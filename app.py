@@ -27,9 +27,7 @@ st.markdown("<h3 style='text-align: center; color: black;'>Only for cash segment
 #getting past datas 
 def past_data(symbol):
     symb = yf.Ticker(symbol+'.NS')
-    
     data = symb.history(period='1y')
-
     return data
 
 #Empty linespace
@@ -55,8 +53,12 @@ if button:
         data_dict = dict()
 
         #Extracting past datas of given stocks
+        waste = []
         for i in symb_list:
-            data_dict[i.upper()] = past_data(i.upper())
+            res = past_data(i.upper())
+            if not res['Open'].any():
+                waste.append(i)
+            data_dict[i.upper()] = res
         st.balloons()
 
         
@@ -112,35 +114,40 @@ if button:
             #Portfolio 1 - Sharpe ratio is the highest
             #Portfolio 2 - Volatility is the lowest
             
-
+            try:
             #Portfolio 1
-            max_sharpe_ratio = result_df.iloc[result_df['Sharpe_Ratio'].idxmax()]
+                max_sharpe_ratio = result_df.iloc[result_df['Sharpe_Ratio'].idxmax()]
 
             #Portfolio 2
-            volatility_lowest = result_df.iloc[result_df['Ann_Vol'].idxmin()]
+                volatility_lowest = result_df.iloc[result_df['Ann_Vol'].idxmin()]
 
-
+            
             #Plotting the simulation
             
-            plt.scatter(result_df['Ann_Vol'],result_df['Ann_Ret'],c =result_df['Sharpe_Ratio'],cmap='RdYlBu')
-            plt.colorbar()
+                plt.scatter(result_df['Ann_Vol'],result_df['Ann_Ret'],c =result_df['Sharpe_Ratio'],cmap='RdYlBu')
+                plt.colorbar()
 
-            plt.scatter(max_sharpe_ratio[1],max_sharpe_ratio[0],marker = (5,1,3),color='red',s=700) #red - Portfolio 1
-            plt.scatter(volatility_lowest[1],volatility_lowest[0],marker = (5,1,3),color='green',s=700)#Green - Portfolio 2
-            
+                plt.scatter(max_sharpe_ratio[1],max_sharpe_ratio[0],marker = (5,1,3),color='red',s=700) #red - Portfolio 1
+                plt.scatter(volatility_lowest[1],volatility_lowest[0],marker = (5,1,3),color='green',s=700)#Green - Portfolio 2
+                
 
-            plt.xlabel('Volatility')
-            plt.ylabel('Returns')
-             
+                plt.xlabel('Volatility')
+                plt.ylabel('Returns')
+                
 
-            st.pyplot() 
+                st.pyplot() 
 
-            #Max_Sharpe_Ratio
-            st.markdown('Max Sharpe Ratio Portfolio Allocation :sunglasses:')
-            st.write(round(max_sharpe_ratio * 100,2))
+                #Max_Sharpe_Ratio
+                st.markdown('Max Sharpe Ratio Portfolio Allocation :sunglasses:')
+                st.write(round(max_sharpe_ratio * 100,2))
 
-            #Least_Voaltility
-            st.markdown('Least Volatile Portfolio Allocation :innocent:')
-            st.write(round(volatility_lowest * 100,2))
+                #Least_Voaltility
+                st.markdown('Least Volatile Portfolio Allocation :innocent:')
+                st.write(round(volatility_lowest * 100,2))
 
-            st.write('**Note : **  *All values above are in %*')
+                st.write('**Note : **  *All values above are in %*')
+            except Exception as e:
+                st.write('Please enter the correct stock name!!')
+                for i in waste:
+                    st.write(i.upper())
+                
